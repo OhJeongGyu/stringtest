@@ -1,0 +1,78 @@
+
+
+<div class="container" style="margin:30px">
+
+  <form action="home/write" method="post">
+    <div class="form-group">
+      <label for="titleInput">제목</label>
+      <input type="string" class="form-control" id="titleInput" name="title" placeholder="제목">
+    </div>
+    <textarea class="form-control" id="post_textarea" rows="5" name="content" placeholder="내용"></textarea>
+    <p id="length1"></P>
+    <p id="length2"></P>
+    <p id="length3"></P>
+    <button type="submit" class="btn btn-default">Submit</button>
+  </form>
+
+  <hr>
+  <%@all_post.each do|p|%>
+    <div class="well">
+		<span style="font-weight:bold;">
+			제목 : <%=p.title%>
+		</span><br>
+
+		내용 : <%=p.content %><br>
+		시간 : <%=p.created_at%>
+
+
+		<form action="home/write_comment" method="post">
+        <div class="form-group">
+        <input type="hidden" value="<%= p.id %>" name="id_of_post">
+        <textarea class="form-control" id="comment_textarea" rows="2" name="content_comment" placeholder="댓글 내용"> </textarea>
+        <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+        <%p.comments.reverse.each do |c|%>
+        <p><%= c.content %></p>
+        <% end %>
+	  </form>
+  </div>
+  <% end %>
+
+</div>
+
+<script>
+
+$(document).ready(function() {
+    $("#post_textarea").on('keyup', function() {
+      	function getKoeanLength(str){
+
+	        var retCode = 0;
+	        var strLength = 0;
+
+	        for (i = 0; i < str.length; i++){
+	          var code = str.charCodeAt(i)
+	          var ch = str.substr(i,1).toUpperCase()
+
+	          code = parseInt(code)
+
+	          if ((ch < "0" || ch > "9") && (ch < "A" || ch > "Z") && ((code > 255) || (code < 0)))
+	            strLength = strLength + 2;
+	          else
+	          	strLength = strLength + 1;
+	        }
+	        return strLength;
+        };
+		
+		function WordCount(str) { 
+		  return str.split(" ").length;
+		}
+
+
+
+        $('#length1').text("- 띄어쓰기 포함 글자 수 길이 : " + this.value.length + "자, " + "바이트 길이 : " + getKoeanLength(this.value) + "Bytes");
+        $('#length2').text("- 띄어쓰기 미 포함 글자 수 길이 : " + String(this.value).trim().length + "자, " + "바이트 길이 : " + getKoeanLength(String(this.value).trim()) + "Bytes");
+        $('#length3').text("단어 갯수 : " +  (WordCount(this.value)));
+    });
+});
+
+</script>

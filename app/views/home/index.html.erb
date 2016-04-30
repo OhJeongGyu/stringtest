@@ -66,12 +66,14 @@ $(document).ready(function() {
 		function WordCount(str) { 
 		  return str.split(" ").length;
 		}
+		var temp_string = this.value;
+		var trim_string = temp_string.replace(/ /gi, '');
 
-
-
-        $('#length1').text("- 띄어쓰기 포함 글자 수 길이 : " + this.value.length + "자, " + "바이트 길이 : " + getKoeanLength(this.value) + "Bytes");
-        $('#length2').text("- 띄어쓰기 미 포함 글자 수 길이 : " + String(this.value).trim().length + "자, " + "바이트 길이 : " + getKoeanLength(String(this.value).trim()) + "Bytes");
-        $('#length3').text("단어 갯수 : " +  (WordCount(this.value)));
+		console.log(temp_string);
+		console.log(trim_string);
+        $('#length1').text("- 띄어쓰기 포함 글자 수 길이 : " + temp_string.length + "자, " + "바이트 길이 : " + getKoeanLength(temp_string) + "Bytes");
+        $('#length2').text("- 띄어쓰기 미 포함 글자 수 길이 : " + trim_string.length + "자, " + "바이트 길이 : " + getKoeanLength(trim_string) + "Bytes");
+        $('#length3').text("단어 갯수 : " +  (WordCount(temp_string)));
     });
 });
 

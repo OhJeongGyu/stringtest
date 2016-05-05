@@ -1,79 +1,137 @@
 
 
-<div class="container" style="margin:30px">
 
-  <form action="home/write" method="post">
-    <div class="form-group">
-      <label for="titleInput">제목</label>
-      <input type="string" class="form-control" id="titleInput" name="title" placeholder="제목">
-    </div>
-    <textarea class="form-control" id="post_textarea" rows="5" name="content" placeholder="내용"></textarea>
-    <p id="length1"></P>
-    <p id="length2"></P>
-    <p id="length3"></P>
-    <button type="submit" class="btn btn-default">Submit</button>
-  </form>
+<div class="row" style="margin:20px">
 
-  <hr>
-  <%@all_post.each do|p|%>
-    <div class="well">
-		<span style="font-weight:bold;">
-			제목 : <%=p.title%>
-		</span><br>
-
-		내용 : <%=p.content %><br>
-		시간 : <%=p.created_at%>
-
-
-		<form action="home/write_comment" method="post">
+  <div class="container">
+    <div class="col-xs-12 col-md-12 col-lg-12">
+      <!-- <form action="home/write" method="post"> -->
         <div class="form-group">
-        <input type="hidden" value="<%= p.id %>" name="id_of_post">
-        <textarea class="form-control" id="comment_textarea" rows="2" name="content_comment" placeholder="댓글 내용"> </textarea>
-        <button type="submit" class="btn btn-default">Submit</button>
+          <label for="titleInput">제목</label>
+          <input type="string" class="form-control" id="titleInput" name="title" placeholder="제목">
         </div>
-        <%p.comments.reverse.each do |c|%>
-        <p><%= c.content %></p>
-        <% end %>
-	  </form>
+        <textarea class="form-control" id="post_textarea" rows="5" name="content" placeholder="내용"></textarea>
+        <p id="length1"></P>
+        <p id="length2"></P>
+        <p id="length3"></P>
+        <button type="submit" class="btn btn-default post_submit">Submit</button>
+      <!-- </form> -->
+    </div>
   </div>
-  <% end %>
+</div>
+<div class="row" style="margin:0px">
+
+    <%@all_post.each do|p|%>
+
+
+      <div class="col-xs-12 col-md-12 col-lg-12">
+        <div class="well" >
+        <span style="font-weight:bold;">
+          제목 : <%=p.title%>
+        </span><br>
+
+        내용 : <%=p.content %><br>
+        시간 : <%=p.created_at%>
+
+        <!-- <form> -->
+        <!-- <form action="home/write_comment" method="post"> -->
+        <!-- //form tag -> 항상 리프레시 -->
+            <div class="form-group">
+              <input type="hidden" value="<%= p.id %>" name="id_of_post">
+              <textarea class="form-control" id="comment_textarea_<%=p.id%>" rows="2" name="content_comment" placeholder="댓글 내용"></textarea>
+              <button value="<%=p.id%>" type="submit" class="btn btn-default reply_submit">Submit</button>
+              <!-- 클래스 이름 -> jqury에서 실행할 때  -->
+            </div>
+            <%p.comments.reverse.each do |c|%>
+            <p><%= c.content %></p>
+            <% end %>
+        <!-- </form> -->
+        </div>
+      </div>
+
+    <% end %>
+
 
 </div>
 
 <script>
 
-$(document).ready(function() {
-    $("#post_textarea").on('keyup', function() {
-      	function getKoeanLength(str){
+  $(".post_submit").click(function(){
+    //this => 누른 것의.
+    post_id = this.value;
+    // alert(post_id);
 
-	        var retCode = 0;
-	        var strLength = 0;
+    //text area의 id 값
+    post_content = $("#post_textarea").val();
+    post_title = $("#titleInput").val();
+    $.ajax({
+      method: "POST",
+      url: "/home/write",
+      data: { title: post_title,
+              content : post_content}
+    })
+      .done(function( msg ) {
+      location.reload();
 
-	        for (i = 0; i < str.length; i++){
-	          var code = str.charCodeAt(i)
-	          var ch = str.substr(i,1).toUpperCase()
-
-	          code = parseInt(code)
-
-	          if ((ch < "0" || ch > "9") && (ch < "A" || ch > "Z") && ((code > 255) || (code < 0)))
-	            strLength = strLength + 2;
-	          else
-	          	strLength = strLength + 1;
-	        }
-	        return strLength;
-        };
-		
-		function WordCount(str) { 
-		  return str.split(" ").length;
-		}
-		var temp_string = this.value;
-		var trim_string = temp_string.replace(/ /gi, '');
-
-	
-        $('#length1').text("- 띄어쓰기 포함 글자 수 길이 : " + temp_string.length + "자, " + "바이트 길이 : " + getKoeanLength(temp_string) + "Bytes");
-        $('#length2').text("- 띄어쓰기 미 포함 글자 수 길이 : " + trim_string.length + "자, " + "바이트 길이 : " + getKoeanLength(trim_string) + "Bytes");
-        $('#length3').text("단어 갯수 : " +  (WordCount(temp_string)));
+        // alert( "리플이 작성되었습니다." );
     });
-});
+  });
+
+  // reply_submit이란 녀석이 클릿이 되면 아래 코드를 돌린다.
+  // #=>id
+  // .=>class
+  $(".reply_submit").click(function(){
+    //this => 누른 것의.
+    post_id = this.value;
+    // alert(post_id);
+
+    //text area의 id 값
+    comment_content = $("#comment_textarea_"+post_id).val();
+    $.ajax({
+      method: "POST",
+      url: "/home/write_comment",
+      data: { content_comment: comment_content,
+              id_of_post : post_id}
+    })
+      .done(function( msg ) {
+      location.reload();
+
+        // alert( "리플이 작성되었습니다." );
+    });
+  });
+
+  $(document).ready(function() {
+      $("#post_textarea").on('keyup', function() {
+        	function getKoeanLength(str){
+
+  	        var retCode = 0;
+  	        var strLength = 0;
+
+  	        for (i = 0; i < str.length; i++){
+  	          var code = str.charCodeAt(i)
+  	          var ch = str.substr(i,1).toUpperCase()
+
+  	          code = parseInt(code)
+
+  	          if ((ch < "0" || ch > "9") && (ch < "A" || ch > "Z") && ((code > 255) || (code < 0)))
+  	            strLength = strLength + 2;
+  	          else
+  	          	strLength = strLength + 1;
+  	        }
+  	        return strLength;
+          };
+
+  		function WordCount(str) {
+  		  return str.split(" ").length;
+  		}
+  		var temp_string = this.value;
+  		var trim_string = temp_string.replace(/ /gi, '');
+
+
+          $('#length1').text("- 띄어쓰기 포함 글자 수 길이 : " + temp_string.length + "자, " + "바이트 길이 : " + getKoeanLength(temp_string) + "Bytes");
+          $('#length2').text("- 띄어쓰기 미 포함 글자 수 길이 : " + trim_string.length + "자, " + "바이트 길이 : " + getKoeanLength(trim_string) + "Bytes");
+          $('#length3').text("단어 갯수 : " +  (WordCount(temp_string)));
+      });
+  });
 
 </script>

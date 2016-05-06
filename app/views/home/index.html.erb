@@ -14,11 +14,12 @@
         <p id="length1"></P>
         <p id="length2"></P>
         <p id="length3"></P>
-        <button type="submit" class="btn btn-default post_submit">Submit</button>
+        <button class="btn btn-fill btn-info post_submit">Submit</button>
       <!-- </form> -->
     </div>
   </div>
 </div>
+
 <div class="row" style="margin:0px">
 
     <%@all_post.each do|p|%>
@@ -42,9 +43,11 @@
               <button value="<%=p.id%>" type="submit" class="btn btn-default reply_submit">Submit</button>
               <!-- 클래스 이름 -> jqury에서 실행할 때  -->
             </div>
-            <%p.comments.reverse.each do |c|%>
-            <p><%= c.content %></p>
-            <% end %>
+            <div id="reply_<%=p.id%>">
+              <%p.comments.each do |c|%>
+              <p><%= c.content %></p>
+              <% end %>
+            </div>
         <!-- </form> -->
         </div>
       </div>
@@ -55,7 +58,7 @@
 </div>
 
 <script>
-
+$(function(){
   $(".post_submit").click(function(){
     //this => 누른 것의.
     post_id = this.value;
@@ -68,7 +71,13 @@
       method: "POST",
       url: "/home/write",
       data: { title: post_title,
-              content : post_content}
+              content : post_content},
+      success: function(){
+        alert("글 작성 완료");
+      },
+      error: function(){
+        alert("글 작성 실패");
+      }
     })
       .done(function( msg ) {
       location.reload();
@@ -91,11 +100,19 @@
       method: "POST",
       url: "/home/write_comment",
       data: { content_comment: comment_content,
-              id_of_post : post_id}
+              id_of_post : post_id},
+      success: function(){
+        // alert("댓글 작성 완료");
+        $("#reply_"+post_id).append("<p>" + comment_content + "</p>" );
+        $("#comment_textarea_"+post_id).val('');
+      },
+      error: function(){
+        // alert("댓글 작성 실패");
+      }
     })
       .done(function( msg ) {
-      location.reload();
-
+      // location.reload();
+      // $(.reply_content).append("댓글 써 졌나.");
         // alert( "리플이 작성되었습니다." );
     });
   });
@@ -133,5 +150,5 @@
           $('#length3').text("단어 갯수 : " +  (WordCount(temp_string)));
       });
   });
-
+});
 </script>
